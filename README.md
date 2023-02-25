@@ -1,0 +1,1 @@
+# Candlestick-chart-pattern-screeners
