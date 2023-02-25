@@ -1,6 +1,19 @@
 import requests
-import datetime
+import datetime 
+from patterns import candlestick_patterns
 
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route("/")
+def hello_world():
+    return render_template("index.html", patterns=candlestick_patterns)
+
+if __name__ == "__main__": 
+    app.run(host="0.0.0.0", debug=True)
+
+'''
 def get_crypto_data():
     url = 'https://min-api.cryptocompare.com/data/v2/histohour'
     payload = {
@@ -52,3 +65,4 @@ def serial_date_to_nice_date(date):
     return datetime.datetime.fromtimestamp(date * 86400).replace(hour=0, minute=0, second=0)
 
 get_crypto_data()
+'''
