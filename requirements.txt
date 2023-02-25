@@ -1,0 +1,8 @@
+python-binance
+TA-Lib
+numpy
+pandas
+flask
+websockets
+requests
+datetime
