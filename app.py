@@ -1,14 +1,51 @@
 import requests
+import os
 import datetime 
+import pandas as pd
+import numpy as np
 from patterns import candlestick_patterns
+from binance import Client
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
+
+
+client=Client()
+
+def get_binance_data(ticker="BTC", interval="1h", start="2 days ago UTC"):
+    ticker=ticker + "USDT"
+    candles=client.get_historical_klines(symbol=ticker, interval=interval, start_str=start)
+    data = pd.DataFrame(candles)
+    data.columns = ['open_time','open', 'high', 'low', 'close', 'volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore']
+    data.index = [pd.to_datetime(x, unit='ms').strftime('%Y-%m-%d %H:%M:%S') for x in data.open_time]
+    data = data.drop(['open_time','volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore'], axis = 1)
+    data = data.rename_axis('open_time', axis='columns')
+    data = data.astype('float')
+    return data
 
 app = Flask(__name__)
 
 @app.route("/")
-def hello_world():
+def index():
+    pattern = request.args.get("pattern", None)
+    if pattern:
+        datafiles = os.listdir('datasets/hourly')
+        for dataset in datafiles:
+            df = pd.read_csv('datasets/hourly/{}'.format(dataset))
+            print(df)
     return render_template("index.html", patterns=candlestick_patterns)
+
+@app.route("/snapshot")
+def snapshot():
+    with open('datasets/coins.csv') as f:
+        coins = f.read().splitlines()
+        for coin in coins:
+            symbol = coin.split(",")[0]
+            binance_df = get_binance_data(symbol)
+            binance_df.to_csv("datasets/hourly/{}.csv".format(symbol))
+        
+        return{
+            "code": "success"
+        }
 
 if __name__ == "__main__": 
     app.run(host="0.0.0.0", debug=True)
