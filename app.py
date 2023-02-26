@@ -16,9 +16,9 @@ def get_binance_data(ticker="BTC", interval="1h", start="2 days ago UTC"):
     candles=client.get_historical_klines(symbol=ticker, interval=interval, start_str=start)
     data = pd.DataFrame(candles)
     data.columns = ['open_time','open', 'high', 'low', 'close', 'volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore']
-    data.index = [pd.to_datetime(x, unit='ms').strftime('%Y-%m-%d %H:%M:%S') for x in data.open_time]
-    data = data.drop(['open_time','volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore'], axis = 1)
-    data = data.rename_axis('open_time', axis='columns')
+    data['open_datetime'] = [pd.to_datetime(x, unit='ms').strftime('%Y-%m-%d %H:%M:%S') for x in data.open_time]
+    data = data.drop(['open_time', 'volume','close_time', 'qav','num_trades','taker_base_vol','taker_quote_vol', 'ignore'], axis = 1)
+    data = data.set_index('open_datetime')
     data = data.astype('float')
     return data
 
@@ -30,7 +30,7 @@ def index():
     if pattern:
         datafiles = os.listdir('datasets/hourly')
         for dataset in datafiles:
-            df = pd.read_csv('datasets/hourly/{}'.format(dataset))
+            df = pd.read_csv('datasets/hourly/{}'.format(dataset), index_col='open_datetime')
             print(df)
     return render_template("index.html", patterns=candlestick_patterns)
 
@@ -41,7 +41,7 @@ def snapshot():
         for coin in coins:
             symbol = coin.split(",")[0]
             binance_df = get_binance_data(symbol)
-            binance_df.to_csv("datasets/hourly/{}.csv".format(symbol))
+            binance_df.to_csv("datasets/hourly/{}.csv".format(symbol), index = True)
         
         return{
             "code": "success"
