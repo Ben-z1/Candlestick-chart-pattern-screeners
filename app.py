@@ -1,8 +1,10 @@
 import requests
-import os
+import os, csv
 import datetime 
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
+import talib
 from patterns import candlestick_patterns
 from binance import Client
 
@@ -27,12 +29,31 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     pattern = request.args.get("pattern", None)
+    coins = {} 
+
+    with open('datasets/coins.csv') as f:
+        for row in csv.reader(f):
+            coins[row[0]] = {'Coin Name': row[1]}
+
     if pattern:
         datafiles = os.listdir('datasets/hourly')
         for dataset in datafiles:
             df = pd.read_csv('datasets/hourly/{}'.format(dataset), index_col='open_datetime')
-            print(df)
-    return render_template("index.html", patterns=candlestick_patterns)
+            pattern_function = getattr(talib, pattern)
+
+            symbol = dataset.split('.')[0]
+            try: 
+                result = pattern_function(df['open'], df['high'], df['low'], df['close'])
+                last = result.tail(1).values[0]
+                if last > 0:
+                    coins[symbol][pattern] = "Bullish"
+                elif last < 0:
+                    coins[symbol][pattern] = "Bearish"
+                else:
+                    coins[symbol][pattern] = None
+            except:
+                pass
+    return render_template("index.html", patterns=candlestick_patterns, stocks=coins, current_pattern=pattern)
 
 @app.route("/snapshot")
 def snapshot():

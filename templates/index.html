@@ -4,6 +4,9 @@
     <head>
         <style>
             body {font-family: Helvetica; margin: 20px;}
+            td {padding: 10px;}
+            .Bullish {background: green; color: white;}
+            .Bearish {background: red; color: white;}
         </style>
     </head>
 
@@ -15,7 +18,7 @@
         <form>
             <select name="pattern">
                 {% for pattern in patterns %}
-                <option value="{{ pattern }}"> {{ patterns[pattern] }}</option>
+                    <option value="{{ pattern }}" {% if pattern ==  current_pattern %} selected="selected" {% endif %}> {{ patterns[pattern] }}</option>
 
                 {% endfor %}
             </select>
@@ -23,5 +26,37 @@
             <input type="submit" value="scan" />
 
         </form>
+
+        <table>
+            <tr>
+                <th>
+                    Symbol
+                </th>
+                <th>
+                    Coin Name
+                </th>
+                <th>
+                    Signal
+                </th>
+            </tr>
+            {% for coin in stocks %}
+                {% if stocks[coin][current_pattern] %}
+                <tr>
+                    <td>{{ coin }}</td>
+                    <td>{{ stocks[coin]['Coin Name'] }}</td>
+                    <td class="{{ stocks[coin][current_pattern] }}">{{ stocks[coin][current_pattern] }}</td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <img src="" />
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+
+
+
+        </table>
+
     </body>
 </html>
