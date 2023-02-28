@@ -3,12 +3,11 @@ import os, csv
 import datetime 
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 import talib
 from patterns import candlestick_patterns
 from binance import Client
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, render_template_string
 
 
 client=Client()
@@ -67,6 +66,11 @@ def snapshot():
         return{
             "code": "success"
         }
+
+def snapshot_handler():
+    snapshot()
+    return 'Snapshot completed'
+
 
 if __name__ == "__main__": 
     app.run(host="0.0.0.0", debug=True)

@@ -11,6 +11,25 @@
     </head>
 
     <body>
+
+        <script type="text/javascript">
+            function refreshData() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/snapshot", true);
+                xhr.onload = function () {
+                    if (xhr.readyState === xhr.DONE) {
+                        if (xhr.status === 200) {
+                            alert("Refresh has been completed!");
+                        } else {
+                            alert("Error: " + xhr.statusText);
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+        </script>
+            
         <h1>
             Chart Pattern Screener
         </h1>
@@ -23,7 +42,8 @@
                 {% endfor %}
             </select>
 
-            <input type="submit" value="scan" />
+            <input type="submit" value="Scan" />
+            <input type="button" id="refresh-button" value="Refresh and Fetch Updated Data" onclick="refreshData()" />
 
         </form>
 
